@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AndroidYT WireGuard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+        
+        :root {
+            --primary: #6e45e2;
+            --secondary: #88d3ce;
+            --dark: #1a1a2e;
+            --light: #f1f1f1;
+            --accent: #ff6b6b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(110, 69, 226, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(136, 211, 206, 0.1) 0%, transparent 20%);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-box {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+            transition: all 0.5s ease;
+        }
+        
+        .login-box:hover {
+            transform: perspective(1000px) rotateY(5deg) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+        
+        .login-box h2 {
+            color: var(--secondary);
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(136, 211, 206, 0.5);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50px;
+            color: var(--light);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .input-group input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(136, 211, 206, 0.3);
+        }
+        
+        .input-group label {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: var(--dark);
+            padding: 0 10px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(110, 69, 226, 0.4);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(110, 69, 226, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .panel-container {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(136, 211, 206, 0.5);
+        }
+        
+        .logo span {
+            color: var(--primary);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 50px;
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab.active {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            box-shadow: 0 5px 15px rgba(110, 69, 226, 0.4);
+        }
+        
+        .tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .panel h2 {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            color: var(--light);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(136, 211, 206, 0.3);
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .btn-panel {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(110, 69, 226, 0.4);
+            margin-top: 10px;
+        }
+        
+        .btn-panel:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(110, 69, 226, 0.6);
+        }
+        
+        .btn-panel:active {
+            transform: translateY(1px);
+        }
+        
+        .telegram-banner {
+            background: linear-gradient(45deg, #0088cc, #00aced);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 20px rgba(0, 136, 204, 0.3);
+            animation: pulseBlue 3s infinite;
+        }
+        
+        @keyframes pulseBlue {
+            0% { box-shadow: 0 0 0 0 rgba(0, 136, 204, 0.3); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 136, 204, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 136, 204, 0); }
+        }
+        
+        .telegram-text {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .telegram-icon {
+            font-size: 2.5rem;
+        }
+        
+        .telegram-info h3 {
+            margin-bottom: 5px;
+            font-size: 1.3rem;
+        }
+        
+        .telegram-info p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .telegram-btn {
+            background: white;
+            color: #0088cc;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .telegram-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .floating-animation {
+            position: absolute;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-1 {
+            top: 20%;
+            left: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-2 {
+            top: 60%;
+            right: 15%;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .floating-3 {
+            bottom: 10%;
+            left: 20%;
+            animation: float 7s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        
+        .glow {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            filter: blur(50px);
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .glow-1 {
+            background: var(--primary);
+            top: 10%;
+            left: 10%;
+        }
+        
+        .glow-2 {
+            background: var(--secondary);
+            bottom: 10%;
+            right: 10%;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .login-box {
+                padding: 30px 20px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                border-radius: 15px;
+            }
+            
+            .telegram-banner {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Floating animations -->
+    <div class="floating-animation floating-1">
+        <i class="fas fa-shield-alt" style="font-size: 3rem; color: rgba(110, 69, 226, 0.3);"></i>
+    </div>
+    <div class="floating-animation floating-2">
+        <i class="fas fa-globe" style="font-size: 4rem; color: rgba(136, 211, 206, 0.3);"></i>
+    </div>
+    <div class="floating-animation floating-3">
+        <i class="fas fa-lock" style="font-size: 2.5rem; color: rgba(255, 107, 107, 0.3);"></i>
+    </div>
+    
+    <!-- Glow effects -->
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    
+    <!-- Login Container (shown by default) -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h2>ورود به پنل WireGuard</h2>
+            <div class="input-group">
+                <input type="password" id="passwordInput" placeholder="رمز عبور را وارد کنید">
+                <label for="passwordInput">رمز عبور</label>
+            </div>
+            <button class="btn" id="loginBtn">ورود به پنل <i class="fas fa-arrow-left"></i></button>
+            
+            <div style="margin-top: 30px; font-size: 0.9rem; opacity: 0.8;">
+                عضو شو
+                <div style="margin-top: 10px;">
+                    <a href="https://t.me/Android_YT98" target="_blank" style="color: var(--secondary); text-decoration: none; font-weight: bold;">
+                        <i class="fab fa-telegram"></i> AndroidYT WireGuard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Panel Container (hidden by default) -->
+    <div class="panel-container" id="panelContainer">
+        <div class="header">
+            <div class="logo">AndroidYT <span>WireGuard</span></div>
+            <div class="user-info">
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span></span>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="wireguard">پنل WireGuard</div>
+            <div class="tab" data-tab="dns">پنل DNS</div>
+        </div>
+        
+        <!-- WireGuard Panel -->
+        <div class="panel" id="wireguardPanel">
+            <h2><i class="fas fa-shield-alt"></i> تولید کانفیگ WireGuard</h2>
+            
+            <div class="form-group">
+                <label for="configName">نام کانفیگ</label>
+                <input type="text" id="configName" class="form-control" placeholder="مثال: MyConfig">
+            </div>
+            
+            <div class="form-group">
+                <label for="country">کشور سرور</label>
+                <select id="country" class="form-control">
+                    <option value="emirates">🇦🇪 امارات (Emirates)</option>
+                    <option value="turkey">🇹🇷 ترکیه (Turkey)</option>
+                    <option value="qatar">🇶🇦 قطر 
+                    
+                    <option value="iran">🇮🇷 ایران (Iran)</option>
+                    <option value="saudi_arabia">🇸🇦 عربستان (Saudi Arabia)</option>option>
+                    <option value="china">🇨🇳 چین (China)</option>
+                                        <option value="pakistan">🇵🇰 پاکستان (Pakistan)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="ip_version">نوع IP</label>
+                <select id="ip_version" class="form-control">
+                    <option value="ipv4">IPv4</option>
+                    <option value="ipv6">IPv6</option>
+                    <option value="both" selected>هر دو (IPv4 و IPv6)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="sim_card">انتخاب اپراتور</label>
+                <select id="sim_card" class="form-control">
+                    <option value="hmrah_eol" selected>همراه اول</option>
+                    <option value="Irancell">ایرانسل+WIFI</option>
+                </select>
+            </div>
+            
+            <button class="btn-panel" id="generateButton">
+                <i class="fas fa-magic"></i> تولید کانفیگ
+            </button>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="configText">کانفیگ تولید شده</label>
+                <textarea id="configText" class="form-control" readonly></textarea>
+            </div>
+            
+            <button class="btn-panel" id="saveButton">
+                <i class="fas fa-download"></i> ذخیره به فایل
+            </button>
+        </div>
+        
+        <!-- DNS Panel -->
+        <div class="panel" id="dnsPanel" style="display: none;">
+            <h2><i class="fas fa-network-wired"></i> تنظیمات DNS</h2>
+            
+            <div class="form-group">
+                <label for="dnsCountry">کشور</label>
+                <select id="dnsCountry" class="form-control">
+                    <option value="emirates">🇦🇪 امارات (Emirates)</option>
+                    <option value="turkey">🇹🇷 ترکیه (Turkey)</option>
+                    <option value="qatar">🇶🇦 قطر (Qatar)</option>
+                    <option value="iran">🇮🇷 ایران (Iran)</option>
+                    <option value="saudi_arabia">🇸🇦 عربستان (Saudi Arabia)</option>
+                    <option value="china">🇨🇳 چین (China)</option>
+                    <option value="pakistan">🇵🇰 پاکستان (Pakistan)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="dnsIpVersion">نوع IP</label>
+                <select id="dnsIpVersion" class="form-control">
+                    <option value="ipv4">IPv4</option>
+                    <option value="ipv6">IPv6</option>
+                    <option value="both">هر دو (IPv4 و IPv6)</option>
+                </select>
+            </div>
+            
+            <button class="btn-panel" id="generateDNSButton">
+                <i class="fas fa-search"></i> دریافت DNS
+            </button>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="dnsText">DNS های سرور</label>
+                <textarea id="dnsText" class="form-control" readonly></textarea>
+            </div>
+            
+            <button class="btn-panel" id="copyDNSButton">
+                <i class="fas fa-copy"></i> کپی DNS
+            </button>
+        </div>
+        
+        <!-- Telegram Banner -->
+        <div class="telegram-banner">
+            <div class="telegram-text">
+                <div class="telegram-icon">
+                    <i class="fab fa-telegram"></i>
+                </div>
+                <div class="telegram-info">
+                    <h3>به کانال تلگرام ما بپیوندید</h3>
+                    <p></p>
+                </div>
+            </div>
+            <a href="https://t.me/Android_YT98" target="_blank" class="telegram-btn">
+                <i class="fab fa-telegram"></i> عضویت در کانال
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Password check
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            const password = document.getElementById('passwordInput').value;
+            const correctPassword = 'AndroidYT98';
+            
+            if (password === correctPassword) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('panelContainer').style.display = 'block';
+            } else {
+                alert('رمز اشتباه اشتباهه برادر');
+            }
+        });
+        
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab');
+        const panels = document.querySelectorAll('.panel');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all panels
+                panels.forEach(p => p.style.display = 'none');
+                
+                // Show the selected panel
+                const tabName = this.getAttribute('data-tab');
+                document.getElementById(tabName + 'Panel').style.display = 'block';
+            });
+        });
+
+        // Generate WireGuard keys using Crypto API
+        function generateWireguardKeys() {
+            function getRandomKey() {
+                const array = new Uint8Array(32);
+                window.crypto.getRandomValues(array);
+                let binary = "";
+                array.forEach(byte => {
+                    binary += String.fromCharCode(byte);
+                });
+                return btoa(binary);
+            }
+
+            return {
+                privateKey: getRandomKey(),
+                publicKey: getRandomKey(),
+                preSharedKey: getRandomKey()
+            };
+        }
+
+        // Random number generator
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // IPv4 and IPv6 prefix mapping for each country
+        const ipv4Prefixes = {
+            "emirates": "217.199.",
+            "turkey": "78.189.",
+            "qatar": "37.205.",
+            "iran": "5.160.",
+            "saudi_arabia": "94.74.",
+            "china": "116.31.",
+            "pakistan": "103.255.",
+        };
+
+        const ipv6Prefixes = {
+            "emirates": "2a01:4f8:1c1c::",
+            "turkey": "2a01:4f8:1c1c::",
+            "qatar": "2a01:4f8:1c1c::",
+            "iran": "2a01:4f8:1c1c::",
+            "saudi_arabia": "2a01:4f8:1c1c::",
+            "china": "2400:8500::",
+            "pakistan": "2400:8500::",
+        };
+
+        // IPv4 address generator
+        function generateRandomIPv4(prefix) {
+            return prefix + randomInt(0, 255) + "." + randomInt(0, 255);
+        }
+
+        // IPv6 address generator
+        function generateRandomIPv6(prefix) {
+            function randHex() {
+                return randomInt(0, 65535).toString(16);
+            }
+
+            return prefix + randHex() + ":" + randHex() + ":" + randHex();
+        }
+
+        // DNS server generator based on SIM card
+        function generateDNSServers(sim_card) {
+            if (sim_card === "hmrah_eol") return "10.202.10.10";
+            else if (sim_card === "Irancell") return "10.202.10.10";
+            else return "";
+        }
+
+        // WireGuard configuration generator
+        function generateWireguardConfig(country, ip_version, sim_card) {
+            const keys = generateWireguardKeys();
+
+            const ipv4_prefix = ipv4Prefixes[country];
+            const ipv6_prefix = ipv6Prefixes[country];
+
+            if (!ipv4_prefix && ip_version !== "ipv6") {
+                alert("کشور انتخابی برای IPv4 نامعتبر است.");
+                return "";
+            }
+
+            if (!ipv6_prefix && ip_version !== "ipv4") {
+                alert("کشور انتخابی برای IPv6 نامعتبر است.");
+                return "";
+            }
+
+            let ipv4_address = "";
+            let ipv6_address = "";
+
+            if (ip_version !== "ipv6") {
+                ipv4_address = generateRandomIPv4(ipv4_prefix);
+            }
+            if (ip_version !== "ipv4") {
+                ipv6_address = generateRandomIPv6(ipv6_prefix);
+            }
+
+            const endpoint = generateRandomIPv4(ipv4_prefix) + ":51820";
+
+            const dns_servers = generateDNSServers(sim_card);
+
+            let address = "";
+            if (ip_version === "ipv4") {
+                address = ipv4_address + "/24";
+            } else if (ip_version === "ipv6") {
+                address = ipv6_address + "/64";
+            } else if (ip_version === "both") {
+                address = ipv4_address + "/24, " + ipv6_address + "/64";
+            }
+
+            const config =
+                `# Configuration
+
+[Interface]
+PrivateKey = ${keys.privateKey}
+Address = ${address}
+DNS = ${dns_servers}
+MTU = 1280
+ListenPort = 51820
+
+[Peer]
+PublicKey = ${keys.publicKey}
+PresharedKey = ${keys.preSharedKey}
+Endpoint = ${endpoint}
+`;
+            return config;
+        }
+
+        // Configuration generation event
+        document.getElementById("generateButton").addEventListener("click", function () {
+            const country = document.getElementById("country").value;
+            const ip_version = document.getElementById("ip_version").value;
+            const sim_card = document.getElementById("sim_card").value;
+            const configName = document.getElementById("configName").value;
+
+            const config = generateWireguardConfig(country, ip_version, sim_card);
+            if (!config) return;
+
+            document.getElementById("configText").value = config;
+        });
+
+        // Save to file functionality
+        document.getElementById("saveButton").addEventListener("click", function() {
+            const config = document.getElementById("configText").value;
+            const configName = document.getElementById("configName").value || "wireguard-config";
+            
+            if (!config.trim()) {
+                alert("هیچ کانفیگی برای ذخیره وجود ندارد!");
+                return;
+            }
+            
+            const blob = new Blob([config], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${configName}.conf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // Generate random DNS for each country
+        function generateRandomDNS(country, ip_version) {
+            const ipv4Prefix = {
+                "emirates": "217.199.",
+                "turkey": "78.189.",
+                "qatar": "37.205.",
+                "iran": "5.160.",
+                "saudi_arabia": "94.74.",
+                "japan": "133.242.",
+                "pakistan": "103.255.",
+            };
+
+            const ipv6Prefix = {
+                "emirates": "2a01:4f8:1c1c::",
+                "turkey": "2a01:4f8:1c1c::",
+                "qatar": "2a01:4f8:1c1c::",
+                "iran": "2a01:4f8:1c1c::",
+                "saudi_arabia": "2a01:4f8:1c1c::",
+                "china": "2400:8500::",
+                "pakistan": "2400:8500::",
+            };
+
+            function generateRandomIPv4(prefix) {
+                return prefix + randomInt(0, 255) + "." + randomInt(0, 255);
+            }
+
+            function generateRandomIPv6(prefix) {
+                function randHex() {
+                    return randomInt(0, 65535).toString(16);
+                }
+
+                return prefix + randHex() + ":" + randHex() + ":" + randHex();
+            }
+
+            let dns = "";
+            if (ip_version === "ipv4") {
+                dns = generateRandomIPv4(ipv4Prefix[country]);
+            } else if (ip_version === "ipv6") {
+                dns = generateRandomIPv6(ipv6Prefix[country]);
+            } else if (ip_version === "both") {
+                dns = `${generateRandomIPv4(ipv4Prefix[country])}
+78.157.42.100
+${generateRandomIPv6(ipv6Prefix[country])}
+${generateRandomIPv6(ipv6Prefix[country])}`;                     
+            }
+            return dns;
+        }
+
+        // Generate DNS event
+        document.getElementById("generateDNSButton").addEventListener("click", function () {
+            const country = document.getElementById("dnsCountry").value;
+            const ip_version = document.getElementById("dnsIpVersion").value;
+
+            const dns = generateRandomDNS(country, ip_version);
+            if (!dns.trim()) {
+                alert("اطلاعات DNS برای کشور انتخابی موجود نیست!");
+                return;
+            }
+            document.getElementById("dnsText").value = dns;
+        });
+
+        // Copy DNS event
+        document.getElementById("copyDNSButton").addEventListener("click", function () {
+            const dns = document.getElementById("dnsText").value;
+            if (!dns.trim()) {
+                alert("متنی برای کپی کردن وجود ندارد!");
+                return;
+            }
+            navigator.clipboard.writeText(dns).then(() => {
+                alert("DNS با موفقیت کپی شد!");
+            }).catch(err => {
+                alert("خطا در کپی کردن DNS: " + err);
+            });
+        });
+
+        // Create particles
+        function createParticles() {
+            const container = document.createElement('div');
+            container.className = 'particles';
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = Math.random() * 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.backgroundColor = 'rgba(110, 69, 226, 0.5)';
+                particle.style.borderRadius = '50%';
+                particle.style.top = Math.random() * 100 + 'vh';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animation = `float ${Math.random() * 10 + 5}s infinite ease-in-out`;
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                
+                container.appendChild(particle);
+            }
+            
+            document.body.appendChild(container);
+        }
+
+        // Initialize particles
+        createParticles();
+    </script>
+</body>
+</html>
